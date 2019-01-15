@@ -357,6 +357,9 @@ class Tokens(object):
     def __getitem__(self, key):
         return self._tokens[key]
 
+    def __len__(self):
+        return len(self._tokens)
+
     @property
     def lower(self):
         return self._lower
@@ -454,12 +457,11 @@ class SentimentIntensityAnalyzer(object):
             sentiments = self.sentiment_valence(
                 valence, sentitext, token, i, sentiments
             )
-
         # modify sentiment score for each word, negation, in/decrease
         # intensity, but check
         sentiments = self._but_check(words_and_emoticons, sentiments)
-
-        valence_dict = self.score_valence(sentiments, text)
+        print(sentiments)
+        valence_dict = self.score_valence(sentiments, words_and_emoticons)
 
         return valence_dict
 
@@ -476,7 +478,6 @@ class SentimentIntensityAnalyzer(object):
                     valence += C_INCR
                 else:
                     valence -= C_INCR
-
             for start_i in range(0, 3):
                 # dampen the scalar modifier of preceding words and emoticons
                 # (excluding the ones that immediately preceed the token) based
@@ -534,8 +535,8 @@ class SentimentIntensityAnalyzer(object):
         # check for modification in sentiment due to contrastive conjunction 'but'
         words_and_emoticons_lower_dict = words_and_emoticons.lower_dict
         bi = words_and_emoticons_lower_dict.get("but", [None])[0]
+        modified_sentiments = []
         if bi is not None:
-            modified_sentiments = []
             for index, sentiment in enumerate(sentiments):
                 if index < bi:
                     modified_sentiments.append(sentiment * 0.5)
@@ -543,6 +544,8 @@ class SentimentIntensityAnalyzer(object):
                     modified_sentiments.append(sentiment * 1.5)
                 else:
                     modified_sentiments.append(sentiment)
+        else:
+            modified_sentiments = sentiments
         return modified_sentiments
 
     @staticmethod
@@ -672,7 +675,7 @@ class SentimentIntensityAnalyzer(object):
     @staticmethod
     def _amplify_ep(text):
         # check for added emphasis resulting from exclamation points (up to 4 of them)
-        ep_count = text.count("!")
+        ep_count = len(text.dict.get("!", []))
         if ep_count > 4:
             ep_count = 4
         # (empirically derived mean sentiment intensity rating increase for
@@ -683,7 +686,7 @@ class SentimentIntensityAnalyzer(object):
     @staticmethod
     def _amplify_qm(text):
         # check for added emphasis resulting from question marks (2 or 3+)
-        qm_count = text.count("?")
+        qm_count = len(text.dict.get("?", []))
         qm_amplifier = 0
         if qm_count > 1:
             if qm_count <= 3:
@@ -713,18 +716,18 @@ class SentimentIntensityAnalyzer(object):
                 neu_count += 1
         return pos_sum, neg_sum, neu_count
 
-    def score_valence(self, sentiments, text):
-        print sentiments
+    def score_valence(self, sentiments, tokens):
         if sentiments:
             sum_s = float(sum(sentiments))
-            # compute and add emphasis from punctuation in text
-            punct_emph_amplifier = self._punctuation_emphasis(text)
+            # compute and add emphasis from punctuation in tokens
+            punct_emph_amplifier = self._punctuation_emphasis(tokens)
             if sum_s > 0:
                 sum_s += punct_emph_amplifier
             elif sum_s < 0:
                 sum_s -= punct_emph_amplifier
-
+            print(sum_s)
             compound = normalize(sum_s)
+            print(compound)
             # discriminate between positive, negative and neutral sentiment scores
             pos_sum, neg_sum, neu_count = \
                 self._sift_sentiment_scores(sentiments)
