@@ -460,10 +460,21 @@ class SentimentIntensityAnalyzer(object):
         # modify sentiment score for each word, negation, in/decrease
         # intensity, but check
         sentiments = self._but_check(words_and_emoticons, sentiments)
-        print(sentiments)
+
         valence_dict = self.score_valence(sentiments, words_and_emoticons)
 
         return valence_dict
+
+    def predict(self, text):
+        """Just give me a score."""
+        valence_dict = self.polarity_scores(text)
+        compound = valence_dict["compound"]
+        if compound > 0:
+            return compound * 0.7 + 0.3
+        elif compound < 0:
+            return compound * 0.7 - 0.3
+        else:
+            return 0.0
 
     def sentiment_valence(self, valence, sentitext, token, i, sentiments):
         is_some_token_cap = sentitext.is_cap_diff
@@ -725,9 +736,7 @@ class SentimentIntensityAnalyzer(object):
                 sum_s += punct_emph_amplifier
             elif sum_s < 0:
                 sum_s -= punct_emph_amplifier
-            print(sum_s)
             compound = normalize(sum_s)
-            print(compound)
             # discriminate between positive, negative and neutral sentiment scores
             pos_sum, neg_sum, neu_count = \
                 self._sift_sentiment_scores(sentiments)
