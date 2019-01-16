@@ -470,11 +470,11 @@ class SentimentIntensityAnalyzer(object):
         valence_dict = self.polarity_scores(text)
         compound = valence_dict["compound"]
         if compound > 0:
-            return compound * 0.7 + 0.3
+            return compound * 0.3 + 0.7
         elif compound < 0:
-            return compound * 0.7 - 0.3
+            return compound * 0.3 + 0.3
         else:
-            return 0.0
+            return 0.5
 
     def sentiment_valence(self, valence, sentitext, token, i, sentiments):
         is_some_token_cap = sentitext.is_cap_diff
