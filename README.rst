@@ -13,6 +13,10 @@ VADER (Valence Aware Dictionary and sEntiment Reasoner) is a lexicon and rule-ba
 * `About the Scoring`_
 * `Ports to Other Programming Languages`_
 
+Installment
+------------------------------------
+pip install git+git://github.com/youhealthy/vaderSentiment.git
+
 Features and Updates
 ------------------------------------
 Many thanks to George Berry, Ewan Klein, Pierpaolo Pantone for key contributions to make VADER better.  The new updates includes capabilities regarding:
